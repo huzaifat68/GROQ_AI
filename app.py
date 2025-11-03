@@ -2,11 +2,6 @@ import streamlit as st
 from groq import Groq
 import os
 
-# Try to import Google Colab userdata for secrets
-try:
-    from google.colab import userdata
-    GROQ_API_KEY = userdata.get('GROQ_API_KEY')
-except:
     GROQ_API_KEY = os.getenv("GROQ_API_KEY", "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")
 
 # Page configuration
