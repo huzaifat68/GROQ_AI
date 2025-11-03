@@ -2,7 +2,8 @@ import streamlit as st
 from groq import Groq
 import os
 
-    GROQ_API_KEY = os.getenv("GROQ_API_KEY", "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")
+# --- Hardcoded GROQ API Key ---
+GROQ_API_KEY = "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"
 
 # Page configuration
 st.set_page_config(
@@ -72,27 +73,12 @@ if "messages" not in st.session_state:
 if "groq_api_key" not in st.session_state:
     st.session_state.groq_api_key = GROQ_API_KEY
 
-# Sidebar
+# Sidebar (without API key configuration)
 with st.sidebar:
     st.title("Configuration")
-    
-    # API Key input - Check for secrets from Colab or Hugging Face
-    if st.session_state.groq_api_key:
-        st.success("API Key loaded from secrets")
-        if st.button("Use Different API Key", use_container_width=True):
-            st.session_state.groq_api_key = "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"
-            st.rerun()
-    else:
-        api_key = st.text_input(
-            "GROQ API Key",
-            type="password",
-            help="Enter your GROQ API key"
-        )
-        
-        if api_key:
-            st.session_state.groq_api_key = api_key
-            st.rerun()
-    
+
+    # Removed API key section here ✅
+
     # Model selection
     model = st.selectbox(
         "Select Model",
@@ -142,58 +128,53 @@ with st.sidebar:
 st.title("🤖 GROQ AI Chatbot")
 st.markdown("*Powered by GROQ's Lightning-Fast Inference*")
 
-# Check if API key is provided
-if not st.session_state.groq_api_key:
-    st.warning("Please enter your GROQ API key in the sidebar to start chatting.")
-    st.info("Don't have an API key? Get one at [console.groq.com](https://console.groq.com)")
-else:
-    # Initialize GROQ client
-    try:
-        client = Groq(api_key=st.session_state.groq_api_key)
-        
-        # Display chat messages from history
-        for idx, message in enumerate(st.session_state.messages):
-            with st.chat_message(message["role"]):
-                st.markdown(message["content"])
-        
-        # Chat input
-        if prompt := st.chat_input("Type your message here..."):
-            # Add user message to chat history
-            st.session_state.messages.append({"role": "user", "content": prompt})
-            
-            # Display user message
-            with st.chat_message("user"):
-                st.markdown(prompt)
-            
-            # Get AI response
-            with st.chat_message("assistant"):
-                message_placeholder = st.empty()
-                
-                try:
-                    # Call GROQ API
-                    chat_completion = client.chat.completions.create(
-                        messages=st.session_state.messages,
-                        model=model,
-                        temperature=temperature,
-                        max_tokens=max_tokens
-                    )
-                    
-                    response = chat_completion.choices[0].message.content
-                    
-                    # Display assistant response
-                    message_placeholder.markdown(response)
-                    
-                    # Add assistant response to chat history
-                    st.session_state.messages.append({"role": "assistant", "content": response})
-                    
-                except Exception as e:
-                    error_message = f"Error: {str(e)}"
-                    message_placeholder.error(error_message)
-                    st.info("Please check your API key and try again.")
+# Initialize GROQ client
+try:
+    client = Groq(api_key=st.session_state.groq_api_key)
     
-    except Exception as e:
-        st.error(f"Failed to initialize GROQ client: {str(e)}")
-        st.info("Please verify your API key is correct.")
+    # Display chat messages from history
+    for idx, message in enumerate(st.session_state.messages):
+        with st.chat_message(message["role"]):
+            st.markdown(message["content"])
+    
+    # Chat input
+    if prompt := st.chat_input("Type your message here..."):
+        # Add user message to chat history
+        st.session_state.messages.append({"role": "user", "content": prompt})
+        
+        # Display user message
+        with st.chat_message("user"):
+            st.markdown(prompt)
+        
+        # Get AI response
+        with st.chat_message("assistant"):
+            message_placeholder = st.empty()
+            
+            try:
+                # Call GROQ API
+                chat_completion = client.chat.completions.create(
+                    messages=st.session_state.messages,
+                    model=model,
+                    temperature=temperature,
+                    max_tokens=max_tokens
+                )
+                
+                response = chat_completion.choices[0].message.content
+                
+                # Display assistant response
+                message_placeholder.markdown(response)
+                
+                # Add assistant response to chat history
+                st.session_state.messages.append({"role": "assistant", "content": response})
+                
+            except Exception as e:
+                error_message = f"Error: {str(e)}"
+                message_placeholder.error(error_message)
+                st.info("Please check your API key and try again.")
+
+except Exception as e:
+    st.error(f"Failed to initialize GROQ client: {str(e)}")
+    st.info("Please verify your API key is correct.")
 
 # Footer
 st.markdown("---")
