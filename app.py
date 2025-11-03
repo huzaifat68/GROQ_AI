@@ -3,7 +3,7 @@ from groq import Groq
 import os
 
 # --- Hardcoded GROQ API Key ---
-GROQ_API_KEY = "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"
+GROQ_API_KEY = ""
 
 # Page configuration
 st.set_page_config(
